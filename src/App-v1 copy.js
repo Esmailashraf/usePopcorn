@@ -135,8 +135,10 @@ function MovieDetails({
         try {
           setError("");
           setIsLoading(true);
+          const controller = new AbortController();
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&i=${selectedMovieID}`
+            `http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&i=${selectedMovieID}`,
+            { signal: controller.signal }
           );
           if (!res.ok)
             throw new Error(
@@ -144,9 +146,12 @@ function MovieDetails({
             );
           const data = await res.json();
           setMovie(data);
+          setError("");
         } catch (e) {
           console.error(e.message);
-          setError(e.message);
+          if (e.name !== "AbortError") {
+            setError(e.message);
+          }
         } finally {
           setIsLoading(false);
         }
